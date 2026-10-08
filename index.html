@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Prototypes</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --text: #0b0c0c; --muted: #505a5f; --link: #1d70b8; --rule: #b1b4b6; --bg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #f3f2f1; --muted: #b1b4b6; --link: #8fbbe8; --rule: #505a5f; --bg: #0b0c0c; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 19px/1.4 system-ui, -apple-system, "Segoe UI", Arial, sans-serif; }
+  main { max-width: 40rem; margin: 0 auto; padding: 40px 16px; }
+  h1 { font-size: 2rem; margin: 0 0 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  th { font-size: 1rem; font-weight: 600; color: var(--muted); }
+  th + th, td + td { text-align: right; white-space: nowrap; padding-left: 16px; }
+  a { color: var(--link); }
+  .vh { position: absolute !important; width: 1px; height: 1px; margin: 0; padding: 0;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Prototypes</h1>
+<table>
+  <thead><tr><th scope="col">Link</th><th scope="col">Last updated</th></tr></thead>
+  <tbody id="sites">
+    <tr><td><a href="/warrant-return/" target="_blank" rel="noopener">warrant-return<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/record-outcome/" target="_blank" rel="noopener">record-outcome<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/manually-send-docs/" target="_blank" rel="noopener">manually-send-docs<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/change-notice/" target="_blank" rel="noopener">change-notice<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/release-packs/" target="_blank" rel="noopener">release-packs<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/hwf-review/" target="_blank" rel="noopener">hwf-review<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+    <tr><td><a href="/prototypes/" target="_blank" rel="noopener">prototypes<span class="vh"> (opens in new tab)</span></a></td><td>–</td></tr>
+  </tbody>
+</table>
+</main>
+<script>
+/* Each date is read live from the linked site's Last-Modified header, which
+   GitHub Pages sets to the time of that site's last deploy. Republishing a
+   site updates its date here with no edit to this page; adding a site means
+   adding a row above. Same origin, so no API call and no rate limit. */
+(function () {
+  var tbody = document.getElementById('sites')
+  var rows = Array.prototype.slice.call(tbody.rows)
+  var fmt = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/London' })
+  Promise.all(rows.map(function (row) {
+    var cell = row.cells[1]
+    row.dataset.t = 0
+    return fetch(row.querySelector('a').getAttribute('href'), { method: 'HEAD', cache: 'no-cache' })
+      .then(function (r) {
+        var lm = r.ok && r.headers.get('Last-Modified')
+        var d = new Date(lm)
+        if (!lm || isNaN(d)) throw new Error('no date')
+        var t = document.createElement('time')
+        t.dateTime = d.toISOString()
+        t.textContent = fmt.format(d)
+        cell.replaceChildren(t)
+        row.dataset.t = d.getTime()
+      })
+      .catch(function () { cell.textContent = 'Not available' })
+  })).then(function () {
+    rows.sort(function (a, b) { return b.dataset.t - a.dataset.t })
+        .forEach(function (row) { tbody.appendChild(row) })
+  })
+})()
+</script>
+</body>
+</html>
